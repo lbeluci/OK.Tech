@@ -1,23 +1,36 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using OK.Tech.Api.Models;
+using OK.Tech.Domain.Apps;
+using OK.Tech.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace OK.Tech.Api.Controllers
 {
     [Route("products")]
     public class ProductsController : MainController
     {
-        [HttpGet]
-        public ActionResult<IEnumerable<ProductViewModel>> GetProducts()
+        private readonly IProductApp _productApp;
+        private readonly IMapper _mapper;
+
+        public ProductsController(IProductApp productApp, IMapper mapper)
         {
-            return CustomResponse(new List<ProductViewModel>());
+            _productApp = productApp;
+            _mapper = mapper;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductViewModel>>> GetProducts()
+        {
+            return CustomResponse(_mapper.Map<IEnumerable<ProductViewModel>>(await _productApp.GetAll()));
         }
 
         [HttpGet("{id:Guid}")]
-        public ActionResult<ProductViewModel> GetProductById(Guid id)
+        public async Task<ActionResult<ProductViewModel>> GetProductById(Guid id)
         {
-            return CustomResponse(new ProductViewModel());
+            return CustomResponse(_mapper.Map<ProductViewModel>(await _productApp.GetById(id)));
         }
 
         [HttpPost]
@@ -28,7 +41,7 @@ namespace OK.Tech.Api.Controllers
                 CustomResponse(ModelState, productViewModel);
             }
 
-            //Criação do produto
+            _productApp.Create(_mapper.Map<Product>(productViewModel));
 
             return CustomResponse(productViewModel);
         }
@@ -41,7 +54,7 @@ namespace OK.Tech.Api.Controllers
                 CustomResponse(ModelState, productViewModel);
             }
 
-            //Criação do produto
+            //Atualização do produto
 
             return CustomResponse(productViewModel);
         }
@@ -49,7 +62,9 @@ namespace OK.Tech.Api.Controllers
         [HttpDelete]
         public ActionResult<ProductViewModel> DeleteProduct(Guid id)
         {
-            return Ok(new ProductViewModel());
+            _productApp.Delete(id);
+
+            return CustomResponse();
         }
     }
 }

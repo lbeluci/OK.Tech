@@ -5,7 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OK.Tech.App;
+using OK.Tech.Domain.Apps;
+using OK.Tech.Domain.Repositories;
 using OK.Tech.Infra.Data.Contexts;
+using OK.Tech.Infra.Data.Repositories;
 
 namespace OK.Tech.Api
 {
@@ -24,6 +28,11 @@ namespace OK.Tech.Api
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
+
+            services.AddAutoMapper(typeof(Startup));
+
+            services.AddScoped<IProductApp, ProductApp>();
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             services.AddControllers();
 
