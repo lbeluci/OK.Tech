@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using OK.Tech.Domain.Notifications;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,31 +9,18 @@ namespace OK.Tech.Api.Controllers
     [ApiController]
     public class MainController : ControllerBase
     {
-        private readonly List<string> _errors;
+        private readonly INotifier _notifier;
 
-        public MainController()
+        public MainController(INotifier notifier)
         {
-            _errors = new List<string>();
+            _notifier = notifier;
         }
 
         protected ActionResult CustomResponse(object result = null)
         {
             if (!IsOperationValid())
             {
-                return BadRequest(new { success = false, errors = _errors, data = result });
-            }
-
-            return Ok(new { success = true, data = result });
-        }
-
-        protected ActionResult CustomResponse(ModelStateDictionary modelState, object result = null)
-        {
-            if (!modelState.IsValid)
-            {
-                var errorMessages = modelState.Values.SelectMany(ms => ms.Errors).Select(me => me.ErrorMessage);
-                _errors.AddRange(errorMessages.ToList());
-
-                return BadRequest(new { success = false, errors = _errors, data = result });
+                return BadRequest(new { success = false, errors = _notifier.GetNotifications().Select(n => n.Message), data = result });
             }
 
             return Ok(new { success = true, data = result });
@@ -40,7 +28,24 @@ namespace OK.Tech.Api.Controllers
 
         protected bool IsOperationValid()
         {
-            return !_errors.Any();
+            return !_notifier.HasNotifications();
+        }
+
+        protected bool IsModelValid()
+        {
+            if (ModelState.IsValid)
+            {
+                return true;
+            }
+
+            //TODO: Tratar os erros
+
+            return false;
+        }
+
+        protected void NotifyModelStateErrors()
+        {
+            IEnumerable<ModelError> errors = ModelState.Values.SelectMany(e => e.Errors);
         }
     }
 }
