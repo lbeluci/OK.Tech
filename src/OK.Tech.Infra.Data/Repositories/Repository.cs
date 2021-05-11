@@ -37,9 +37,9 @@ namespace OK.Tech.Infra.Data.Repositories
             _entities.Update(entity);
         }
 
-        public void Delete(Guid id)
+        public void Delete(TEntity entity)
         {
-            _entities.Remove(new TEntity { Id = id });
+            _entities.Remove(entity);
         }
     }
 }

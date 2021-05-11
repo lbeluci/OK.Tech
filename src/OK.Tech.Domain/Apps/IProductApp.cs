@@ -13,8 +13,8 @@ namespace OK.Tech.Domain.Apps
 
         Task Create(Product product);
 
-        void Update(Product product);
+        Task Update(Guid id, Product product);
 
-        void Delete(Guid id);
+        Task Delete(Guid id);
     }
 }

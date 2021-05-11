@@ -39,14 +39,47 @@ namespace OK.Tech.App
             await UnitOfWork.Save();
         }
 
-        public void Update(Product product)
+        public async Task Update(Guid id, Product product)
         {
-            _productRepository.Update(product);
+            if (id != product.Id)
+            {
+                Notify($"The supplied ids {id} and {product.Id} are differents.");
+                return;
+            }
+
+            if (!Validate(new ProductValidation(), product))
+            {
+                return;
+            }
+
+            var productToUpdate = await GetById(id);
+
+            if (productToUpdate == null)
+            {
+                Notify($"Product {id} not found.");
+                return;
+            }
+
+            productToUpdate.Name = product.Name;
+            productToUpdate.Description = product.Description;
+            productToUpdate.Active = product.Active;
+
+            _productRepository.Update(productToUpdate);
+            await UnitOfWork.Save();
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
-            _productRepository.Delete(id);
+            var productToDelete = await GetById(id);
+
+            if (productToDelete == null)
+            {
+                Notify($"Product {id} not found.");
+                return;
+            }
+
+            _productRepository.Delete(productToDelete);
+            await UnitOfWork.Save();
         }
     }
 }

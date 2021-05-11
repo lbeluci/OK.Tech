@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OK.Tech.Api.Models;
 using OK.Tech.Domain.Apps;
 using OK.Tech.Domain.Entities;
+using OK.Tech.Domain.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace OK.Tech.Api.Controllers
         private readonly IProductApp _productApp;
         private readonly IMapper _mapper;
 
-        public ProductsController(IProductApp productApp, IMapper mapper)
+        public ProductsController(IProductApp productApp, IMapper mapper, INotifier notifier) : base(notifier)
         {
             _productApp = productApp;
             _mapper = mapper;
@@ -34,35 +35,35 @@ namespace OK.Tech.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductViewModel>> CreateProduct(ProductViewModel productViewModel)
+        public async Task<ActionResult> CreateProduct(ProductViewModel productViewModel)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    CustomResponse(ModelState, productViewModel);
-            //}
+            if (!IsModelValid())
+            {
+                return CustomResponse(productViewModel);
+            }
 
             await _productApp.Create(_mapper.Map<Product>(productViewModel));
 
-            return CustomResponse(productViewModel);
+            return CustomResponse();
         }
 
         [HttpPut("{id:Guid}")]
-        public ActionResult<ProductViewModel> UpdateProduct(Guid id, ProductViewModel productViewModel)
+        public async Task<ActionResult> UpdateProduct(Guid id, ProductViewModel productViewModel)
         {
-            if (!ModelState.IsValid)
+            if (!IsModelValid())
             {
-                CustomResponse(ModelState, productViewModel);
+                return CustomResponse(productViewModel);
             }
 
-            //Atualização do produto
+            await _productApp.Update(id, _mapper.Map<Product>(productViewModel));
 
-            return CustomResponse(productViewModel);
+            return CustomResponse();
         }
 
-        [HttpDelete]
-        public ActionResult<ProductViewModel> DeleteProduct(Guid id)
+        [HttpDelete("{id:Guid}")]
+        public async Task<ActionResult> DeleteProduct(Guid id)
         {
-            _productApp.Delete(id);
+            await _productApp.Delete(id);
 
             return CustomResponse();
         }

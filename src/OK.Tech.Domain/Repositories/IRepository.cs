@@ -15,6 +15,6 @@ namespace OK.Tech.Domain.Repositories
 
         void Update(TEntity entity);
 
-        void Delete(Guid id);
+        void Delete(TEntity entity);
     }
 }

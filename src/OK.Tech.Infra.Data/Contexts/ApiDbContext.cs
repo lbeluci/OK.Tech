@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OK.Tech.Domain.Entities;
 using System.Linq;
 
 namespace OK.Tech.Infra.Data.Contexts
@@ -9,8 +8,6 @@ namespace OK.Tech.Infra.Data.Contexts
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
         {
         }
-
-        public DbSet<Product> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
