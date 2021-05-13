@@ -2,7 +2,7 @@
 
 namespace OK.Tech.Domain.Apps
 {
-    public interface IProductApp : IApp<Product>
+    public interface IPriceListApp : IApp<PriceList>
     {
     }
 }
